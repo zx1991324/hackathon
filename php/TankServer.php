@@ -2,7 +2,7 @@
 namespace hackathon\php;
 
 error_reporting(E_ALL);
-
+var_dump('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT');
 require_once '/thrift/lib/php/lib/Thrift/ClassLoader/ThriftClassLoader.php';
 require_once '/hackathon/hackathon/gen_php/tank/player/PlayerServer.php';
 require_once '/hackathon/hackathon/gen_php/tank/player/Types.php';
@@ -33,16 +33,29 @@ use Thrift\Transport\TBufferedTransport;
 
 class PlayerServerHandler implements PlayerServerIf{
 
+    private $arrArgument = null;
+    private $intTankNum = 0;
+    private $arrTanks = null;
+    private $ARRAY_ORDER = array(
+        0 => 'stop',
+        1 => 'turnTo',
+        2 => 'fire',
+        3 => 'move',
+    );
+    private $ARRAY_DIRECTION = array(
+        1 => 'UP',
+        2 => 'DOWN',
+        3 => 'LEFT',
+        4 => 'RIGHT',
+    );
     public function uploadMap(array $gamemap){
-        var_dump('MAP:'. json_encode($gamemap));
-        return array();
     }
     /**
-     * @param \tank\player\Args $arguments
+     * @param rgs $arguments
      */
     public function uploadParamters(Args $arguments){
-        var_dump('Arg:' . json_encode($arguments));
-        return array();
+        var_dump($arguments);
+        $this->arrArgument = $arguments;
     }
     /**
      * Assign a list of tank id to the player.
@@ -52,8 +65,8 @@ class PlayerServerHandler implements PlayerServerIf{
      * @param int[] $tanks
      */
     public function assignTanks(array $tanks){
-        var_dump('Tank:' . json_encode($tanks));
-        return array();
+        $this->arrTanks = $tanks;
+        $this->intTankNum = count($tanks);
     }
     /**
      * Report latest game state to player.
@@ -62,7 +75,7 @@ class PlayerServerHandler implements PlayerServerIf{
      * @param \tank\player\GameState $state
      */
     public function latestState(GameState $state){
-        return array();
+        //var_dump($state);
     }
     /**
      * Ask for the tank orders for this round.
@@ -71,20 +84,54 @@ class PlayerServerHandler implements PlayerServerIf{
      * @return \tank\player\Order[]
      */
     public function getNewOrders(){
-        return array('move');
+        $arrOrders = array();
+        $arrOrderList = array();
+        for($intIndex = 0; $intIndex <= 3; $intIndex++){
+            $intRandomOrder = rand(0,3);
+            $intRandomDirection = rand(1,4);
+            if(0 == $intRandomOrder){
+                continue;
+            }
+            $arrOrderTmp = array();
+            $arrOrderTmp['order'] = $this->ARRAY_ORDER[$intRandomOrder];
+            $intTankId = $this->arrTanks[$intIndex];
+            $arrOrderTmp['tankId'] = $intTankId;
+            $arrOrderTmp['dir'] = $intRandomDirection;
+
+            $objOrder = new Order($arrOrderTmp);
+            $arrOrderList[] = $objOrder;
+        }
+        return $arrOrderList;
     }
 }
 header('Content-Type','application/x-thrift');
 if (php_sapi_name() == 'cli') {
     echo PHP_EOL;
 }
+use Thrift\Factory\TBinaryProtocolFactory;
+use Thrift\Factory\TTransportFactory;
+use Thrift\Server\TForkingServer;
+use Thrift\Server\TServerSocket;
+
+$serverTransport = new TServerSocket("0.0.0.0", 80);
+$clientTransport = new TTransportFactory();
+$binaryProtocol = new TBinaryProtocolFactory();
 
 $handler = new PlayerServerHandler();
 $processor = new PlayerServerProcessor($handler);
 
-$transport = new TBufferedTransport(new TPhpStream(TPhpStream::MODE_R | TPhpStream::MODE_W));
+$server = new TForkingServer(
+    $processor,
+    $serverTransport,
+    $clientTransport,
+    $clientTransport,
+    $binaryProtocol,
+    $binaryProtocol
+);
+$server->serve();
+/*$transport = new TBufferedTransport(new TPhpStream(TPhpStream::MODE_R | TPhpStream::MODE_W));
 $protocol = new TBinaryProtocol($transport,true,true);
 
 $transport->open();
 $processor->process($protocol,$protocol);
-$transport->close();
+$transport->close();*/
