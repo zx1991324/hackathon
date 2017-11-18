@@ -9,7 +9,7 @@ use Thrift\ClassLoader\ThriftClassLoader;
 $GEN_DIR = realpath(dirname(__FILE__).'/../') . '/gen_php';
 $loader = new ThriftClassLoader();
 $loader->registerNamespace('Thrift','/thrift/lib/php/lib/');
-$loader->registerDefinition('tank',$GEN_DIR);
+$loader->registerDefinition('hackathon',$GEN_DIR);
 $loader->register();
 
 if (php_sapi_name() == 'cli') {
@@ -23,13 +23,13 @@ use Thrift\Transport\TBufferedTransport;
 class PlayerServerHandler implements \tank\player\PlayerServerIf{
 
     public function uploadMap(array $gamemap){
-        var_dump($gamemap);
+        var_dump('MAP:'. $gamemap);
     }
     /**
      * @param \tank\player\Args $arguments
      */
     public function uploadParamters(\tank\player\Args $arguments){
-
+        var_dump('Arg:' . json_encode($arguments));
     }
     /**
      * Assign a list of tank id to the player.
