@@ -4,8 +4,8 @@ namespace hackathon\php;
 error_reporting(E_ALL);
 
 require_once '/thrift/lib/php/lib/Thrift/ClassLoader/ThriftClassLoader.php';
-require_once '/hackathon/hackathon/gen_php/tank/PlayerServer.php';
-require_once '/hackathon/hackathon/gen_php/tank/Types.php';
+require_once '/hackathon/hackathon/gen_php/tank/player/PlayerServer.php';
+require_once '/hackathon/hackathon/gen_php/tank/player/Types.php';
 use tank\player\Order;
 use tank\player\Position;
 use tank\player\Tank;
@@ -14,6 +14,7 @@ use tank\player\GameState;
 use tank\player\Args;
 use Thrift\ClassLoader\ThriftClassLoader;
 use tank\player\PlayerServerIf;
+use tank\player\PlayerServerProcessor;
 
 
 $GEN_DIR = realpath(dirname(__FILE__).'/../') . '/gen_php';
@@ -33,13 +34,15 @@ use Thrift\Transport\TBufferedTransport;
 class PlayerServerHandler implements PlayerServerIf{
 
     public function uploadMap(array $gamemap){
-        var_dump('MAP:'. $gamemap);
+        var_dump('MAP:'. json_encode($gamemap));
+        return array();
     }
     /**
      * @param \tank\player\Args $arguments
      */
     public function uploadParamters(Args $arguments){
         var_dump('Arg:' . json_encode($arguments));
+        return array();
     }
     /**
      * Assign a list of tank id to the player.
@@ -49,7 +52,8 @@ class PlayerServerHandler implements PlayerServerIf{
      * @param int[] $tanks
      */
     public function assignTanks(array $tanks){
-
+        var_dump('Tank:' . json_encode($tanks));
+        return array();
     }
     /**
      * Report latest game state to player.
@@ -58,7 +62,7 @@ class PlayerServerHandler implements PlayerServerIf{
      * @param \tank\player\GameState $state
      */
     public function latestState(GameState $state){
-
+        return array();
     }
     /**
      * Ask for the tank orders for this round.
@@ -67,7 +71,7 @@ class PlayerServerHandler implements PlayerServerIf{
      * @return \tank\player\Order[]
      */
     public function getNewOrders(){
-
+        return array('move');
     }
 }
 header('Content-Type','application/x-thrift');
