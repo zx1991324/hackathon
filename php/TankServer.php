@@ -1,5 +1,5 @@
 <?php
-namespace tank\php;
+namespace hackathon\php;
 
 error_reporting(E_ALL);
 
