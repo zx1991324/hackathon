@@ -4,7 +4,17 @@ namespace hackathon\php;
 error_reporting(E_ALL);
 
 require_once '/thrift/lib/php/lib/Thrift/ClassLoader/ThriftClassLoader.php';
+require_once '/hackathon/hackathon/gen_php/tank/PlayerServer.php';
+require_once '/hackathon/hackathon/gen_php/tank/Types.php';
+use tank\player\Order;
+use tank\player\Position;
+use tank\player\Tank;
+use tank\player\Shell;
+use tank\player\GameState;
+use tank\player\Args;
 use Thrift\ClassLoader\ThriftClassLoader;
+use tank\player\PlayerServerIf;
+
 
 $GEN_DIR = realpath(dirname(__FILE__).'/../') . '/gen_php';
 $loader = new ThriftClassLoader();
@@ -20,7 +30,7 @@ use Thrift\Protocol\TBinaryProtocol;
 use Thrift\Transport\TPhpStream;
 use Thrift\Transport\TBufferedTransport;
 
-class PlayerServerHandler implements \tank\player\PlayerServerIf{
+class PlayerServerHandler implements PlayerServerIf{
 
     public function uploadMap(array $gamemap){
         var_dump('MAP:'. $gamemap);
@@ -28,7 +38,7 @@ class PlayerServerHandler implements \tank\player\PlayerServerIf{
     /**
      * @param \tank\player\Args $arguments
      */
-    public function uploadParamters(\tank\player\Args $arguments){
+    public function uploadParamters(Args $arguments){
         var_dump('Arg:' . json_encode($arguments));
     }
     /**
@@ -47,7 +57,7 @@ class PlayerServerHandler implements \tank\player\PlayerServerIf{
      *
      * @param \tank\player\GameState $state
      */
-    public function latestState(\tank\player\GameState $state){
+    public function latestState(GameState $state){
 
     }
     /**
@@ -65,8 +75,8 @@ if (php_sapi_name() == 'cli') {
     echo PHP_EOL;
 }
 
-$handler = new \tank\php\PlayerServerHandler();
-$processor = new \tank\player\PlayerServerProcessor($handler);
+$handler = new PlayerServerHandler();
+$processor = new PlayerServerProcessor($handler);
 
 $transport = new TBufferedTransport(new TPhpStream(TPhpStream::MODE_R | TPhpStream::MODE_W));
 $protocol = new TBinaryProtocol($transport,true,true);
